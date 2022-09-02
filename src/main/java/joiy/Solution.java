@@ -35,8 +35,8 @@ public class Solution {
         // way2: just calculate
         ListNode ptr1 = l1;
         ListNode ptr2 = l2;
-        ListNode rst = new ListNode(); // uninitialized
-        ListNode curr = rst;
+        ListNode rst = null, tail = null; // uninitialized
+
         // 进位值
         int addedNum = 0;
         int thisDigit;
@@ -56,26 +56,19 @@ public class Solution {
             }
 
             // update thisDigit and addedNum
-            if (sum > 9) {
-                thisDigit = sum - 10;
-                addedNum = 1;
-            }else {
-                thisDigit = sum;
-                addedNum = 0;
-            }
+            thisDigit = sum % 10;
+            addedNum = sum / 10;
 
             // put thisDigit to curr and update curr
-            // case1: extreme case
-            if (ptr1 == null && ptr2 == null) {
-                curr.val = thisDigit;
-                if (addedNum > 0) {
-                    curr.next = new ListNode(addedNum);
-                }
-                return rst;
-            }// case2: normal
-            curr.val = thisDigit;
-            curr.next = new ListNode();
-            curr = curr.next;
+            if (rst == null) {
+                rst = tail = new ListNode(thisDigit);
+            }else {
+                tail.next = new ListNode(thisDigit);
+                tail = tail.next;
+            }
+        }
+        if (addedNum > 0) {
+            tail.next = new ListNode(addedNum);
         }
         return rst;
     }
