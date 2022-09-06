@@ -1,167 +1,77 @@
 package joiy;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-
-import java.math.BigInteger;
+import org.junit.jupiter.api.Test;
 
 public class Solution {
-    public static class ListNode {
-        int val;
-        ListNode next;
-
-        ListNode() {
-        }
-
-        ListNode(int val) {
-            this.val = val;
-        }
-
-        ListNode(int val, ListNode next) {
-            this.val = val;
-            this.next = next;
-        }
-
-        @Override
-        public java.lang.String toString() {
-            return "ListNode{" +
-                    "val=" + val +
-                    ", next=" + next +
-                    '}';
-        }
-    }
-
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        // way2: just calculate
-        ListNode ptr1 = l1;
-        ListNode ptr2 = l2;
-        ListNode rst = null, tail = null; // uninitialized
-
-        // 进位值
-        int addedNum = 0;
-        int thisDigit;
-        while (ptr1 != null || ptr2 != null) {
-            int sum;
-            // get sum and update ptr1 and ptr2
-            if (ptr1 == null) {
-                sum = ptr2.val + addedNum;
-                ptr2 = ptr2.next;
-            }else if (ptr2 == null) {
-                sum = ptr1.val + addedNum;
-                ptr1 = ptr1.next;
-            }else{// else both != null
-                sum = ptr1.val + ptr2.val + addedNum;
-                ptr1 = ptr1.next;
-                ptr2 = ptr2.next;
-            }
-
-            // update thisDigit and addedNum
-            thisDigit = sum % 10;
-            addedNum = sum / 10;
-
-            // put thisDigit to curr and update curr
-            if (rst == null) {
-                rst = tail = new ListNode(thisDigit);
-            }else {
-                tail.next = new ListNode(thisDigit);
-                tail = tail.next;
-            }
-        }
-        if (addedNum > 0) {
-            tail.next = new ListNode(addedNum);
-        }
-        return rst;
-    }
-
-    private ListNode makeListNode(BigInteger sum) {
-        // get last digit by tracing a ptr
-        // remove last digit by decrease ptr
-        // iterate until ptr=0
-        String s = sum.toString();
-        int ptr = s.length() - 1;
-        if (ptr == 0) {
-            return new ListNode(Integer.parseInt(s));
-        }
-
-        ListNode rst = new ListNode();
-        ListNode curr = rst;
-
-        while (ptr > 0) {
-            // - 48 to convert '1' to 1, '2' to 2
-            curr.val = s.charAt(ptr) - 48;
-            ptr -= 1;
-            curr.next = new ListNode();
-            curr = curr.next;
-        }
-        curr.val = s.charAt(ptr) - 48;
-        return rst;
-    }
-
-    private BigInteger getBigInter(ListNode node) {
-        // 1 get length of nodeList
-        // 2 new a char[len]
-        // 3 put node.val in 2 reversely
-        int len = getLen(node);
-        char[] chars = new char[len];
-        for (int i = len - 1; i > -1; i--) {
-            // + 48 to convert 1 to '1', 2 to '2'
-            chars[i] = (char) (48 + node.val);
-            node = node.next;
-        }
-        return new BigInteger(java.lang.String.copyValueOf(chars));
-    }
-
     /**
-     * assume node.val != null
+     * 本题 用一个 queue 来维护最长不重复char substring(移动窗口)
+     * 由于 string 的特殊性, 可以用两个指针+queueLen变量, 来模拟queue,
+     * 从而节约内存。
+     * big O = square(n)
      */
-    private int getLen(ListNode node) {
-        int len = 0;
-        if (node.next == null) {
-            return 1;
+    public int lengthOfLongestSubstring(String s) {
+        // queue start idx, queue end idx
+        int qs = 0, qe = 0, max = 0;
+        // s length
+        int len = s.length();
+        // special case
+        if (len == 1) return 1;
+        // queue length
+        int queueLen = 0;
+        for (;qe < len; qe++) { // 用qe作为下标,遍历 s
+            // 获取当前char
+            char curr = s.charAt(qe);
+            // 查看 curr 是否出现在 queue 中
+            boolean psIncr = false;
+            for (int j = qs; j < qe; j++) {
+                if (s.charAt(j) == curr) {
+                    // if curr in queue, update qs
+                    qs= j+1;
+                    // when qs increases, update queueLen
+                    queueLen= qe - qs + 1;
+                    psIncr = true;
+                    break;
+                }
+            }
+            if (!psIncr) {
+                // if curr not in queue (when ps is not changed):
+                // increase queue length
+                queueLen++;
+                // when queueLen incr, update max
+                max = Math.max(queueLen, max);
+            }
         }
-        while (node.next != null){
-            node = node.next;
-            len += 1;
-        }
-        return len+1;
+        return max;
     }
 
     @Test
-    public void testGetLen() {
-        // --- test getLen()
-        ListNode node1 = new ListNode(2);
-        Assertions.assertEquals(getLen(node1), 1);
+    public void main() {
+        int len = lengthOfLongestSubstring("abcdea");
+        Assertions.assertEquals(5, len);
+        int len1 = lengthOfLongestSubstring("abcabc");
+        Assertions.assertEquals(3, len1);
+        int len2 = lengthOfLongestSubstring("aaaaa");
+        Assertions.assertEquals(1, len2);
 
-        ListNode node2 = new ListNode(4);
-        node1.next = node2;
-        Assertions.assertEquals(getLen(node1), 2);
+        int len3 = lengthOfLongestSubstring("");
+        Assertions.assertEquals(0, len3);
+        int len4 = lengthOfLongestSubstring("au");
+        Assertions.assertEquals(2, len4);
 
-        ListNode node3 = new ListNode(3);
-        node2.next = node3;
-        Assertions.assertEquals(getLen(node1), 3);
+        int len5 = lengthOfLongestSubstring("pwwkew");
+        Assertions.assertEquals(3, len5);
 
-        // --- test getBigInteger()
-        BigInteger b1 = getBigInter(node1);
-//        Assertions.assertEquals(b1, new BigInteger("321"));
+        int len6 = lengthOfLongestSubstring("abcabcbb");
+        Assertions.assertEquals(3, len6);
+        int len7 = lengthOfLongestSubstring(" ");
+        Assertions.assertEquals(1, len7);
+        int len8 = lengthOfLongestSubstring("aab");
+        Assertions.assertEquals(2, len8);
 
-        ListNode node0 = new ListNode(0);
-        node0.next = node1;
-//        Assertions.assertEquals(getBigInter(node0), new BigInteger("3210"));
-
-        node3.next = new ListNode(0);
-//        Assertions.assertEquals(getBigInter(node1), new BigInteger("0321"));
-
-
-        BigInteger sum = b1.add(new BigInteger("1"));
-//        System.out.println("sum = " + sum);
-
-//        System.out.println(getBigInter(node1));
-//        System.out.println(getBigInter(node2));
-        ListNode b2 = makeListNode(new BigInteger("342"));
-        ListNode b3 = makeListNode(new BigInteger("465"));
-
-
-        System.out.println(addTwoNumbers(b2, b3));
+        int len9 = lengthOfLongestSubstring("bwf");
+        Assertions.assertEquals(3, len9);
     }
+
 }
 
