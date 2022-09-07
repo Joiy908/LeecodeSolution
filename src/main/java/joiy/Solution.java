@@ -3,26 +3,30 @@ package joiy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Solution {
     /**
      * 本题 用一个 queue 来维护最长不重复char substring(移动窗口)
-     * way2: use hashmap to speed up search
+     * way2.1: use hash to speed up search
      */
     public int lengthOfLongestSubstring(String s) {
         // s length
         int len = s.length();
         if (len == 0) return 0;
-        HashMap<Character, Integer> hash = new HashMap<>(36);
+        int[] hash = new int[256];
         // queue start idx, queue end idx
         int left = 0, max = 0;
 
+        Arrays.fill(hash, -1);
+        // 为了避免初始化, 让所有的i+1
         for (int i = 0; i < len; i++) {
-            if (hash.containsKey(s.charAt(i))) {
-                left = Math.max(left,hash.get(s.charAt(i)) + 1);
+            if (hash[s.charAt(i)] != -1) { // contains
+                left = Math.max(left,hash[s.charAt(i)] + 1);
             }
-            hash.put(s.charAt(i), i);
+            // put
+            hash[s.charAt(i)] = i;
             // update max length
             max = Math.max(max, i-left+1);
         }
