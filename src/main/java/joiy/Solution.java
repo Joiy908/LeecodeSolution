@@ -3,32 +3,43 @@ package joiy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-
 public class Solution {
     /**
      * 本题 用一个 queue 来维护最长不重复char substring(移动窗口)
-     * way2.1: use hash to speed up search
+     * 由于 string 的特殊性, 可以用两个指针+queueLen变量, 来模拟queue,
+     * 从而节约内存。
      */
     public int lengthOfLongestSubstring(String s) {
+        // queue start idx, queue end idx
+        int qs = 0, qe = 0, max = 0;
         // s length
         int len = s.length();
-        if (len == 0) return 0;
-        int[] hash = new int[256];
-        // queue start idx, queue end idx
-        int left = 0, max = 0;
-
-        Arrays.fill(hash, -1);
-        // 为了避免初始化, 让所有的i+1
-        for (int i = 0; i < len; i++) {
-            if (hash[s.charAt(i)] != -1) { // contains
-                left = Math.max(left,hash[s.charAt(i)] + 1);
+        // special case
+        if (len == 1) return 1;
+        // queue length
+        int queueLen = 0;
+        for (;qe < len; qe++) { // 用qe作为下标,遍历 s
+            // 获取当前char
+            char curr = s.charAt(qe);
+            // 查看 curr 是否出现在 queue 中
+            boolean psIncr = false;
+            for (int j = qs; j < qe; j++) {
+                if (s.charAt(j) == curr) {
+                    // if curr in queue, update qs
+                    qs= j+1;
+                    // when qs increases, update queueLen
+                    queueLen= qe - qs + 1;
+                    psIncr = true;
+                    break;
+                }
             }
-            // put
-            hash[s.charAt(i)] = i;
-            // update max length
-            max = Math.max(max, i-left+1);
+            if (!psIncr) {
+                // if curr not in queue (when ps is not changed):
+                // increase queue length
+                queueLen++;
+                // when queueLen incr, update max
+                max = Math.max(queueLen, max);
+            }
         }
         return max;
     }
