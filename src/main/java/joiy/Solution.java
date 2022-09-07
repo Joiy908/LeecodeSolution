@@ -3,44 +3,28 @@ package joiy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 public class Solution {
     /**
      * 本题 用一个 queue 来维护最长不重复char substring(移动窗口)
-     * 由于 string 的特殊性, 可以用两个指针+queueLen变量, 来模拟queue,
-     * 从而节约内存。
-     * big O = square(n)
+     * way2: use hashmap to speed up search
      */
     public int lengthOfLongestSubstring(String s) {
-        // queue start idx, queue end idx
-        int qs = 0, qe = 0, max = 0;
         // s length
         int len = s.length();
-        // special case
-        if (len == 1) return 1;
-        // queue length
-        int queueLen = 0;
-        for (;qe < len; qe++) { // 用qe作为下标,遍历 s
-            // 获取当前char
-            char curr = s.charAt(qe);
-            // 查看 curr 是否出现在 queue 中
-            boolean psIncr = false;
-            for (int j = qs; j < qe; j++) {
-                if (s.charAt(j) == curr) {
-                    // if curr in queue, update qs
-                    qs= j+1;
-                    // when qs increases, update queueLen
-                    queueLen= qe - qs + 1;
-                    psIncr = true;
-                    break;
-                }
+        if (len == 0) return 0;
+        HashMap<Character, Integer> hash = new HashMap<>(36);
+        // queue start idx, queue end idx
+        int left = 0, max = 0;
+
+        for (int i = 0; i < len; i++) {
+            if (hash.containsKey(s.charAt(i))) {
+                left = Math.max(left,hash.get(s.charAt(i)) + 1);
             }
-            if (!psIncr) {
-                // if curr not in queue (when ps is not changed):
-                // increase queue length
-                queueLen++;
-                // when queueLen incr, update max
-                max = Math.max(queueLen, max);
-            }
+            hash.put(s.charAt(i), i);
+            // update max length
+            max = Math.max(max, i-left+1);
         }
         return max;
     }
