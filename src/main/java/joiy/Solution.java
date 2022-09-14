@@ -5,71 +5,63 @@ import org.junit.jupiter.api.Test;
 
 public class Solution {
     /**
-     * 本题 用一个 queue 来维护最长不重复char substring(移动窗口)
-     * 由于 string 的特殊性, 可以用两个指针+queueLen变量, 来模拟queue,
-     * 从而节约内存。
+     * 思路1:
+     *  1 把每一个 char 当做对称轴, 求最长 palindrome
+     *  2 把每个 btw char 当做对称轴，求最长 palindrome
      */
-    public int lengthOfLongestSubstring(String s) {
-        // queue start idx, queue end idx
-        int qs = 0, qe = 0, max = 0;
-        // s length
-        int len = s.length();
-        // special case
-        if (len == 1) return 1;
-        // queue length
-        int queueLen = 0;
-        for (;qe < len; qe++) { // 用qe作为下标,遍历 s
-            // 获取当前char
-            char curr = s.charAt(qe);
-            // 查看 curr 是否出现在 queue 中
-            boolean psIncr = false;
-            for (int j = qs; j < qe; j++) {
-                if (s.charAt(j) == curr) {
-                    // if curr in queue, update qs
-                    qs= j+1;
-                    // when qs increases, update queueLen
-                    queueLen= qe - qs + 1;
-                    psIncr = true;
-                    break;
+    public String longestPalindrome(String s) {
+        if (s.length() == 1) return s;
+        char[] chars = s.toCharArray();
+        // use 2 ptr to maintain longest*
+        // longestPalindromeStart = 0
+        int maxStart = 0, maxEnd = 0, maxLen = 0;
+        for (int i = 1; i < chars.length; i++) {
+            // use c as Symmetry axis
+            int j = 1;
+            int currLen;
+            while (i-j > -1 && i+j < chars.length && chars[i-j] == chars[i+j]) {
+                currLen = 2 * j + 1;
+                if (currLen > maxLen) {
+                    maxStart = i - j;
+                    maxEnd = i + j;
+                    maxLen = currLen;
                 }
-            }
-            if (!psIncr) {
-                // if curr not in queue (when ps is not changed):
-                // increase queue length
-                queueLen++;
-                // when queueLen incr, update max
-                max = Math.max(queueLen, max);
+                j++;
             }
         }
-        return max;
+        for (int i = 0; i < chars.length; i++) {
+            // use near right-of-c as Symmetry axis
+            int j = 0;
+            int currLen;
+            while (i-j > -1 && i+j+1 < chars.length && chars[i-j] == chars[i+j+1]) {
+                currLen = 2 * ( j + 1);
+                if (currLen > maxLen) {
+                    maxStart = i - j;
+                    maxEnd = i + j + 1;
+                    maxLen = currLen;
+                }
+                j++;
+            }
+        }
+        return maxLen == 0 ? s.substring(0, 1) : s.substring(maxStart, maxEnd+1);
     }
 
     @Test
     public void main() {
-        int len = lengthOfLongestSubstring("abcdea");
-        Assertions.assertEquals(5, len);
-        int len1 = lengthOfLongestSubstring("abcabc");
-        Assertions.assertEquals(3, len1);
-        int len2 = lengthOfLongestSubstring("aaaaa");
-        Assertions.assertEquals(1, len2);
+        String rst1 = longestPalindrome("babad");
+        Assertions.assertEquals(rst1, "bab");
 
-        int len3 = lengthOfLongestSubstring("");
-        Assertions.assertEquals(0, len3);
-        int len4 = lengthOfLongestSubstring("au");
-        Assertions.assertEquals(2, len4);
+        String rst2 = longestPalindrome("cbbd");
+        Assertions.assertEquals(rst2, "bb");
 
-        int len5 = lengthOfLongestSubstring("pwwkew");
-        Assertions.assertEquals(3, len5);
+        final String rst = longestPalindrome("a");
+        Assertions.assertEquals(rst, "a");
 
-        int len6 = lengthOfLongestSubstring("abcabcbb");
-        Assertions.assertEquals(3, len6);
-        int len7 = lengthOfLongestSubstring(" ");
-        Assertions.assertEquals(1, len7);
-        int len8 = lengthOfLongestSubstring("aab");
-        Assertions.assertEquals(2, len8);
+        final String s = longestPalindrome("ac");
+        Assertions.assertEquals(s, "a");
 
-        int len9 = lengthOfLongestSubstring("bwf");
-        Assertions.assertEquals(3, len9);
+        final String s1 = longestPalindrome("bb");
+        Assertions.assertEquals(s1, "bb");
     }
 
 }
