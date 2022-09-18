@@ -3,65 +3,41 @@ package joiy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
+
 public class Solution {
     /**
-     * 思路1:
-     *  1 把每一个 char 当做对称轴, 求最长 palindrome
-     *  2 把每个 btw char 当做对称轴，求最长 palindrome
+     * 将一个给定字符串 s 根据给定的行数 numRows ，以从上往下、从左到右进行 Z 字形排列
+     *
      */
-    public String longestPalindrome(String s) {
-        if (s.length() == 1) return s;
-        char[] chars = s.toCharArray();
-        // use 2 ptr to maintain longest*
-        // longestPalindromeStart = 0
-        int maxStart = 0, maxEnd = 0, maxLen = 0;
-        for (int i = 1; i < chars.length; i++) {
-            // use c as Symmetry axis
-            int j = 1;
-            int currLen;
-            while (i-j > -1 && i+j < chars.length && chars[i-j] == chars[i+j]) {
-                currLen = 2 * j + 1;
-                if (currLen > maxLen) {
-                    maxStart = i - j;
-                    maxEnd = i + j;
-                    maxLen = currLen;
-                }
-                j++;
-            }
+    public String convert(String s, int numRows) {
+        if (numRows == 1) return s;
+        // new n list
+        // use a flag to decide curr item to which list
+
+        LinkedList<StringBuilder> bin = new LinkedList<>();
+        for (int i = 0; i < numRows; i++) {
+            bin.add(new StringBuilder());
         }
-        for (int i = 0; i < chars.length; i++) {
-            // use near right-of-c as Symmetry axis
-            int j = 0;
-            int currLen;
-            while (i-j > -1 && i+j+1 < chars.length && chars[i-j] == chars[i+j+1]) {
-                currLen = 2 * ( j + 1);
-                if (currLen > maxLen) {
-                    maxStart = i - j;
-                    maxEnd = i + j + 1;
-                    maxLen = currLen;
-                }
-                j++;
-            }
+        int flag = -1, target = 1;
+        for (char c : s.toCharArray()) {
+            target += flag;
+            bin.get(target).append(c);
+            if (target == 0 || target == numRows - 1) flag = -flag;
         }
-        return maxLen == 0 ? s.substring(0, 1) : s.substring(maxStart, maxEnd+1);
+        StringBuilder rst = new StringBuilder(s.length());
+        for (StringBuilder sb : bin) {
+            rst.append(sb);
+        }
+        return rst.toString();
     }
 
     @Test
     public void main() {
-        String rst1 = longestPalindrome("babad");
-        Assertions.assertEquals(rst1, "bab");
-
-        String rst2 = longestPalindrome("cbbd");
-        Assertions.assertEquals(rst2, "bb");
-
-        final String rst = longestPalindrome("a");
-        Assertions.assertEquals(rst, "a");
-
-        final String s = longestPalindrome("ac");
-        Assertions.assertEquals(s, "a");
-
-        final String s1 = longestPalindrome("bb");
-        Assertions.assertEquals(s1, "bb");
+        String s = "PAYPALISHIRING";
+        int numRows = 3;
+        final String rst = convert(s, numRows);
+        Assertions.assertEquals(rst, "PAHNAPLSIIGYIR");
     }
 
 }
