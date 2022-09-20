@@ -36,18 +36,16 @@ public class Solution {
         }
         end--;
 
-        int rst = 0, last, lastJ;
+        long rst = 0;
         // 2. reversely get rst
-        for (int i = end, j = 1; i >= start ; i--) {
-            last = rst;
-            lastJ = j;
-            rst += (chars[i] - '0') * j;
-            j *= 10;
-            if (last != rst%lastJ || j/10 != lastJ) { // overflow
+        int i = end;
+        for (long j = 1; i >= start ; i--,j*=10) {
+            rst += (long) (chars[i] - '0') * j;
+            if (rst > Integer.MAX_VALUE || j> Integer.MAX_VALUE) { // overflow
                 return -1 == sign ? Integer.MIN_VALUE : Integer.MAX_VALUE;
             }
         }
-        return sign * rst;
+        return (int) (sign * rst);
     }
 
     public boolean isDigit(char c) {
@@ -90,8 +88,10 @@ public class Solution {
         Assertions.assertEquals(ex, myAtoi(s));
 
         s = "    10522545459";
+        String s1 = "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000522545459";
         ex = Integer.MAX_VALUE;
         Assertions.assertEquals(ex, myAtoi(s));
+        Assertions.assertEquals(ex, myAtoi(s1));
 
 
 
