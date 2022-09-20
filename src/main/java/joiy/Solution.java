@@ -6,11 +6,18 @@ import org.junit.jupiter.api.Test;
 public class Solution {
     /**
      * 请你来实现一个 myAtoi(string s) 函数，使其能将字符串转换成一个 32 位有符号整数
+     * version2: 妙着:
+     * rst = rst * 10 + nextDigit
+     * 这样会 overflow,
+     * solution1: long rst;算后判断(rst*10 + nextDigit > Integer.Max)
+     * solution2: 不如把 overflow 的部分变成减法
+     * rst > (Integer.Max - nextDigit)/10
+     * 省去了用 long, great.
      */
     public int myAtoi(String s) {
         if (s.equals("")) return 0;
         // 1. trim: find start and end
-        int start = 0, end = 0, sign;
+        int start = 0, end, sign;
         // 1.1 find start
         char[] chars = s.toCharArray();
         for (char c : chars) {
@@ -36,16 +43,16 @@ public class Solution {
         }
         end--;
 
-        long rst = 0;
-        // 2. reversely get rst
-        int i = end;
-        for (long j = 1; i >= start ; i--,j*=10) {
-            rst += (long) (chars[i] - '0') * j;
-            if (rst > Integer.MAX_VALUE || j> Integer.MAX_VALUE) { // overflow
+        int rst = 0;
+        // 2. get rst
+        for (int i = start; i <= end ; i++) {
+            int digit = chars[i] - '0';
+            if (rst  > (Integer.MAX_VALUE - digit)/10) { // overflow
                 return -1 == sign ? Integer.MIN_VALUE : Integer.MAX_VALUE;
             }
+            rst = rst*10 + digit;
         }
-        return (int) (sign * rst);
+        return sign * rst;
     }
 
     public boolean isDigit(char c) {
@@ -92,10 +99,6 @@ public class Solution {
         ex = Integer.MAX_VALUE;
         Assertions.assertEquals(ex, myAtoi(s));
         Assertions.assertEquals(ex, myAtoi(s1));
-
-
-
-
     }
 
 }
