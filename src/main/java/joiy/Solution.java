@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 public class Solution {
     /**
      * 请你来实现一个 myAtoi(string s) 函数，使其能将字符串转换成一个 32 位有符号整数
-     * version2: 妙着:
+     * version2: subtlety:
      * rst = rst * 10 + nextDigit
      * 这样会 overflow,
      * solution1: long rst;算后判断(rst*10 + nextDigit > Integer.Max)
-     * solution2: 不如把 overflow 的部分变成减法
+     * solution2: 可以把 overflow 的部分变成减法
      * rst > (Integer.Max - nextDigit)/10
      * 省去了用 long, great.
      */
